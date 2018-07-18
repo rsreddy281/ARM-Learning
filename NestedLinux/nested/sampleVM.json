@@ -192,7 +192,7 @@
     "outputs": {
         "sampleVMPrivateIP":{
             "type": "string",
-            "value": "[reference(concat('Microsoft.Network/networkInterfaces', parameters('sampleVMSettings').nicName)).ipConfigurations[0].properties.privateIPAddress]"
+            "value": "[reference(concat('Microsoft.Network/networkInterfaces/', parameters('sampleVMSettings').nicName)).ipConfigurations[0].properties.privateIPAddress]"
         }
     }
 }
