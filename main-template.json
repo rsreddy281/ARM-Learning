@@ -16,7 +16,7 @@
         "vnetSettings": {
             "location": "[variables('location')]",
             "networkApiVersion": "2016-03-30",
-            "virtualNetworkName": "gigamon-vnet",
+            "virtualNetworkName": "sample-vnet",
             "addressPrefix": "10.0.0.0/16",
             "subnet1Name": "mgmt-subnet",
             "subnet1Prefix": "10.0.1.0/24",
