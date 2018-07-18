@@ -150,7 +150,7 @@
         {
             "name": "[parameters('sampleVMSettings').vmName]",
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "[parameters('apiVersions').vmName]",
+            "apiVersion": "[parameters('apiVersions').vmApiVersion]",
             "location": "[parameters('sampleVMSettings').location]",
             "dependsOn": [
                 "[concat('Microsoft.Network/networkInterfaces/', parameters('sampleVMSettings').nicName)]"
