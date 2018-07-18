@@ -1,1 +1,198 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sampleVMSettings":{
+            "type": "object"
+        },
+        "apiVersions":{
+            "type": "object"
+        },
+        "vnetSettings":{
+            "type": "object"
+        }
+    },
+    "variables": {
+        "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetSettings').virtualNetworkName)]",
+        "subnet1Ref": "[concat(variables('vnetId'), '/subnets/', parameters('vnetSettings').subnet1Name)]"
+    },
+    "resources": [
+        {
+            "name": "[parameters('sampleVMSettings').publicIpName]",
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "[parameters('apiVersions').pIPApiVersion]",
+            "location": "[parameters('sampleVMSettings').location]",
+            "properties":{
+                "publicIPAllocationMethod": "[parameters('sampleVMSettings').publicIpAddressType]",
+                "dnsSettings":{
+                    "domainNameLabel": "[parameters('sampleVMSettings').dnsLabelPrefix]"
+                }
+            }
 
+        },
+        {
+            "name": "[parameters('sampleVMSettings').nsgName]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "[parameters('apiVersions').nsgApiVersion]",
+            "location": "[parameters('sampleVMSettings').location]",
+            "properties":{
+                "securityRules":[
+                    {
+                        "name": "ssh",
+                        "properties":{
+                            "priority": 1010,
+                            "sourceAddressPrefix": "*",
+                            "protocol":"Tcp",
+                            "destinationPortRange": "22",
+                            "access":"Allow",
+                            "direction":"Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    },
+                    {
+                        "name": "https",
+                        "properties":{
+                            "priority": 1020,
+                            "sourceAddressPrefix": "*",
+                            "protocol":"Tcp",
+                            "destinationPortRange": "443",
+                            "access":"Allow",
+                            "direction":"Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    },
+                    {
+                        "name": "http",
+                        "properties":{
+                            "priority": 1030,
+                            "sourceAddressPrefix": "*",
+                            "protocol":"Tcp",
+                            "destinationPortRange": "80",
+                            "access":"Allow",
+                            "direction":"Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    },
+                    {
+                        "name": "for-sampleVM",
+                        "properties":{
+                            "priority": 1040,
+                            "sourceAddressPrefix": "*",
+                            "protocol":"Tcp",
+                            "destinationPortRange": "3000",
+                            "access":"Allow",
+                            "direction":"Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    },
+                    {
+                        "name": "out-http",
+                        "properties":{
+                            "priority": 1050,
+                            "sourceAddressPrefix": "80",
+                            "protocol":"Tcp",
+                            "destinationPortRange": "*",
+                            "access":"Allow",
+                            "direction":"Outbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    },
+                    {
+                        "name": "out-https",
+                        "properties":{
+                            "priority": 1060,
+                            "sourceAddressPrefix": "443",
+                            "protocol":"Tcp",
+                            "destinationPortRange": "*",
+                            "access":"Allow",
+                            "direction":"Outbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[parameters('sampleVMSettings').nicName]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "[parameters('apiVersions').nicApiVersion]",
+            "location": "[parameters('sampleVMSettings').location]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/publicIpAddresses', parameters('sampleVMSettings').publicIpName)]",
+                "[concat('Microsoft.Network/networkSecurityGroup', parameters('sampleVMSettings').nsgName)]"
+            ],
+            "properties":{
+                "ipConfigurations":[
+                    {
+                        "name": "ipconfig1",
+                        "properties":{
+                            "subnet":{
+                                "id": "[variables('subnet1Ref')]"
+                            },
+                            "privateIPAllocationMethod":"Dynamic",
+                            "publicIPAddress":{
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', parameters('sampleVMSettings').publicIpName)]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup":{
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroup', parameters('sampleVMSettings').nsgName)]"
+                }
+            }
+        },
+        {
+            "name": "[parameters('sampleVMSettings').vmName]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "[parameters('apiVersions').vmName]",
+            "location": "[parameters('sampleVMSettings').location]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces', parameters('sampleVMSettings').nicName)]"
+            ],
+            "properties":{
+                "osProfile":{
+                    "computerName": "[parameters('sampleVMSettings').vmName]",
+                    "adminUsername": "[parameters('sampleVMSettings').adminUsername]",
+                    "adminPassword": "[parameters('sampleVMSettings').adminPassword]"
+                },
+                "hardwareProfile":{
+                    "vmSize": "[parameters('sampleVMSettings').vmSize]"
+                },
+                "storageProfile":{
+                    "imageReference":{
+                        "publisher": "[parameters('sampleVMSettings').publisher]",
+                        "offer": "[parameters('sampleVMSettings').offer]",
+                        "sku": "[parameters('sampleVMSettings').sku]",
+                        "version": "[parameters('sampleVMSettings').version]"
+                    },
+                    "osDisk":{
+                        "createOption":"FromImage",
+                        "managedDisk":{
+                            "storageAccountType":"Standard_LRS"
+                        }
+                    },
+                    "dataDisks":[]
+                },
+                "networkProfile":{
+                    "networkInterfaces":[
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('sampleVMSettings').nicName)]"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "sampleVMPrivateIP":{
+            "type": "string",
+            "value": "[reference(concat('Microsoft.Network/networkInterfaces', parameters('sampleVMSettings').nicName)).ipConfigurations[0].properties.privateIPAddress]"
+        }
+    }
+}
