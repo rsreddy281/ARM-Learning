@@ -1,9 +1,7 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
-    "parameters": {
-        
-    },
+    "parameters": {},
     "variables": {
         "apiVersions": {
             "vnetApiVersion": "2017-04-01",
@@ -14,7 +12,7 @@
             "storageApiVersion": "2015-06-15",
             "availabilitySetApiVersion": "2017-03-30"
         },
-        "vnetSettings":{
+        "vnetSettings": {
             "location": "[variables('location')]",
             "networkApiversion": "2016-03-30",
             "virtualNetworkName": "sample-vnet",
@@ -24,11 +22,11 @@
             "subnet2Name": "mirror-subnet",
             "subnet2Prefix": "10.0.2.0/24"
         },
-        "sampleVMSettings":{
+        "sampleVMSettings": {
             "location": "[variables('location')]",
             "publicIpName": "sampleVM-pip",
             "publicIpAddressType": "Dynamic",
-            "dnsLabelPrefix": "[concat('sampleVM', variables('suffix'))]",
+            "dnsLabelPrefix": "[concat('samplevm', variables('suffix'))]",
             "nsgName": "sampleVM-nsg",
             "nicName": "sampleVm-nic",
             "vmName": "sampleVM",
@@ -37,7 +35,7 @@
             "vmSize": "Standard_B1s",
             "publisher": "Canonical",
             "offer": "UbuntuServer",
-            "sku": "16.01-LTS",
+            "sku": "16.04-LTS",
             "version": "latest"
         },
         "location": "eastus",
@@ -48,57 +46,57 @@
             "type": "Microsoft.Resources/deployments",
             "name": "VirtualNetwork",
             "apiVersion": "2016-02-01",
-            "dependsOn": [],
-            "properties":{
-                "mode":"Incremental",
-                "templateLink":{
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
                     "uri": "https://raw.githubusercontent.com/rsreddy281/ARM-Learning/master/NestedLinux/nested/vnet.json",
                     "contentVersion": "1.0.0.0"
                 },
-                "parameters":{
-                    "vnetSettings":{
+                "parameters": {
+                    "vnetSettings": {
                         "value": "[variables('vnetSettings')]"
                     },
-                    "apiVersions":{
+                    "apiVersions": {
                         "value": "[variables('apiVersions')]"
                     }
                 }
-            }
+            },
+            "dependsOn": []
         },
         {
             "type": "Microsoft.Resources/deployments",
             "name": "sampleVM",
             "apiVersion": "2016-02-01",
-            "dependsOn": [
-                "VirtualNetwork"
-            ],
-            "properties":{
-                "mode":"Incremental",
-                "parametersLink":{
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
                     "uri": "https://raw.githubusercontent.com/rsreddy281/ARM-Learning/master/NestedLinux/nested/sampleVM.json",
                     "contentVersion": "1.0.0.0"
                 },
-                "parameters":{
-                    "sampleVMSettings":{
+                "parameters": {
+                    "sampleVMSettings": {
                         "value": "[variables('sampleVMSettings')]"
                     },
-                    "vnetSettings":{
+                    "vnetSettings": {
                         "value": "[variables('vnetSettings')]"
                     },
-                    "apiVersions":{
+                    "apiVersions": {
                         "value": "[variables('apiVersions')]"
                     }
                 }
-            }
+            },
+            "dependsOn": [
+                "VirtualNetwork"
+            ]
         }
     ],
     "outputs": {
-        "vmLoginUsername":{
-            "type": "string",
+        "vmLoginUsername": {
+            "type": "String",
             "value": "admin"
         },
-        "vmLoginPassword":{
-            "type": "string",
+        "vmLoginPassword": {
+            "type": "String",
             "value": "admin"
         }
     }
