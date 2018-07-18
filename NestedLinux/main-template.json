@@ -52,7 +52,7 @@
             "properties":{
                 "mode":"Incremental",
                 "templateLink":{
-                    "uri": "https://raw.githubusercontent.com/rsreddy281/ARM-Learning/master/nested/vnet.json",
+                    "uri": "https://raw.githubusercontent.com/rsreddy281/ARM-Learning/master/NestedLinux/nested/vnet.json",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters":{
@@ -75,7 +75,7 @@
             "properties":{
                 "mode":"Incremental",
                 "parametersLink":{
-                    "uri": "https://raw.githubusercontent.com/rsreddy281/ARM-Learning/master/nested/sampleVM.json",
+                    "uri": "https://raw.githubusercontent.com/rsreddy281/ARM-Learning/master/NestedLinux/nested/sampleVM.json",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters":{
