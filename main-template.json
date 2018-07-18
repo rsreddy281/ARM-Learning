@@ -37,9 +37,7 @@
             "publisher": "Canonical",
             "offer": "UbuntuServer",
             "sku": "16.04-LTS",
-            "version": "latest",
-            "extName": "sampleVM-setup",
-            "scriptUrl": "[concat(parameters('_artifactsLocation'),'/scripts/sampleVM.sh')]"
+            "version": "latest"
         },
         "location": "eastus",
         "suffix": "[substring(uniqueString(resourceGroup().id), 0, 5)]"
