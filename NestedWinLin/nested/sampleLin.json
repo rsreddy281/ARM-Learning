@@ -1,0 +1,185 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sampleVMSettings1":{
+            "type": "object"
+        },
+        "apiVersions":{
+            "type": "object"
+        },
+        "vnetSettings":{
+            "type": "object"
+        }
+    },
+    "variables": {
+        "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetSettings').virtualNetworkName)]",
+        "subnet2Ref": "[concat(variables('vnetId'), '/subnets/', parameters('vnetSettings').subnet2Name)]"
+    },
+    "resources": [
+        {
+            "name": "[parameters('sampleVMSettings1').publicIpName]",
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "[parameters('apiVersions').pIPApiVersion]",
+            "location": "[parameters('sampleVMSettings1').location]",
+            "properties":{
+                "publicIPAllocationMethod": "[parameters('sampleVMSettings1').publicIpAddressType]",
+                "dnsSettings":{
+                    "domainNameLabel": "[parameters('sampleVMSettings1').dnsLabelPrefix]"
+                }
+            }
+
+        },
+        {
+            "name": "[parameters('sampleVMSettings1').nsgName]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "[parameters('apiVersions').nsgApiVersion]",
+            "location": "[parameters('sampleVMSettings1').location]",
+            "properties":{
+                "securityRules":[
+                    {
+                        "name": "ssh",
+                        "properties":{
+                            "priority": 1010,
+                            "sourceAddressPrefix": "*",
+                            "protocol":"Tcp",
+                            "destinationPortRange": "22",
+                            "access":"Allow",
+                            "direction":"Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    },
+                    {
+                        "name": "https",
+                        "properties":{
+                            "priority": 1020,
+                            "sourceAddressPrefix": "*",
+                            "protocol":"Tcp",
+                            "destinationPortRange": "443",
+                            "access":"Allow",
+                            "direction":"Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    },
+                    {
+                        "name": "http",
+                        "properties":{
+                            "priority": 1030,
+                            "sourceAddressPrefix": "*",
+                            "protocol":"Tcp",
+                            "destinationPortRange": "80",
+                            "access":"Allow",
+                            "direction":"Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    },
+                    {
+                        "name": "out-http",
+                        "properties":{
+                            "priority": 1050,
+                            "sourceAddressPrefix": "80",
+                            "protocol":"Tcp",
+                            "destinationPortRange": "*",
+                            "access":"Allow",
+                            "direction":"Outbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    },
+                    {
+                        "name": "out-https",
+                        "properties":{
+                            "priority": 1060,
+                            "sourceAddressPrefix": "443",
+                            "protocol":"Tcp",
+                            "destinationPortRange": "*",
+                            "access":"Allow",
+                            "direction":"Outbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[parameters('sampleVMSettings1').nicName]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "[parameters('apiVersions').nicApiVersion]",
+            "location": "[parameters('sampleVMSettings1').location]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/publicIpAddresses/', parameters('sampleVMSettings1').publicIpName)]",
+                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('sampleVMSettings1').nsgName)]"
+            ],
+            "properties":{
+                "ipConfigurations":[
+                    {
+                        "name": "ipconfig1",
+                        "properties":{
+                            "subnet":{
+                                "id": "[variables('subnet2Ref')]"
+                            },
+                            "privateIPAllocationMethod":"Dynamic",
+                            "publicIPAddress":{
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', parameters('sampleVMSettings1').publicIpName)]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup":{
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('sampleVMSettings1').nsgName)]"
+                }
+            }
+        },
+        {
+            "name": "[parameters('sampleVMSettings1').vmName]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "[parameters('apiVersions').vmApiVersion]",
+            "location": "[parameters('sampleVMSettings1').location]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', parameters('sampleVMSettings1').nicName)]"
+            ],
+            "properties":{
+                "osProfile":{
+                    "computerName": "[parameters('sampleVMSettings1').vmName]",
+                    "adminUsername": "[parameters('sampleVMSettings1').adminUsername]",
+                    "adminPassword": "[parameters('sampleVMSettings1').adminPassword]"
+                },
+                "hardwareProfile":{
+                    "vmSize": "[parameters('sampleVMSettings1').vmSize]"
+                },
+                "storageProfile":{
+                    "imageReference":{
+                        "publisher": "[parameters('sampleVMSettings1').publisher]",
+                        "offer": "[parameters('sampleVMSettings1').offer]",
+                        "sku": "[parameters('sampleVMSettings1').sku]",
+                        "version": "[parameters('sampleVMSettings1').version]"
+                    },
+                    "osDisk":{
+                        "createOption":"FromImage",
+                        "managedDisk":{
+                            "storageAccountType":"Standard_LRS"
+                        }
+                    },
+                    "dataDisks":[]
+                },
+                "networkProfile":{
+                    "networkInterfaces":[
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('sampleVMSettings1').nicName)]"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "sampleVMPrivateIP":{
+            "type": "string",
+            "value": "[reference(concat('Microsoft.Network/networkInterfaces/', parameters('sampleVMSettings1').nicName)).ipConfigurations[0].properties.privateIPAddress]"
+        }
+    }
+}
