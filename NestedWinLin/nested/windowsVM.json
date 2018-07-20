@@ -2,7 +2,7 @@
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "sampleVMSettings":{
+        "windowsVMSettings":{
             "type": "object"
         },
         "apiVersions":{
@@ -18,23 +18,23 @@
     },
     "resources": [
         {
-            "name": "[parameters('sampleVMSettings').publicIpName]",
+            "name": "[parameters('windowsVMSettings').publicIpName]",
             "type": "Microsoft.Network/publicIpAddresses",
             "apiVersion": "[parameters('apiVersions').pIPApiVersion]",
-            "location": "[parameters('sampleVMSettings').location]",
+            "location": "[parameters('windowsVMSettings').location]",
             "properties":{
-                "publicIPAllocationMethod": "[parameters('sampleVMSettings').publicIpAddressType]",
+                "publicIPAllocationMethod": "[parameters('windowsVMSettings').publicIpAddressType]",
                 "dnsSettings":{
-                    "domainNameLabel": "[parameters('sampleVMSettings').dnsLabelPrefix]"
+                    "domainNameLabel": "[parameters('windowsVMSettings').dnsLabelPrefix]"
                 }
             }
 
         },
         {
-            "name": "[parameters('sampleVMSettings').nsgName]",
+            "name": "[parameters('windowsVMSettings').nsgName]",
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "[parameters('apiVersions').nsgApiVersion]",
-            "location": "[parameters('sampleVMSettings').location]",
+            "location": "[parameters('windowsVMSettings').location]",
             "properties":{
                 "securityRules":[
                     {
@@ -106,13 +106,13 @@
             }
         },
         {
-            "name": "[parameters('sampleVMSettings').nicName]",
+            "name": "[parameters('windowsVMSettings').nicName]",
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "[parameters('apiVersions').nicApiVersion]",
-            "location": "[parameters('sampleVMSettings').location]",
+            "location": "[parameters('windowsVMSettings').location]",
             "dependsOn": [
-                "[concat('Microsoft.Network/publicIpAddresses/', parameters('sampleVMSettings').publicIpName)]",
-                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('sampleVMSettings').nsgName)]"
+                "[concat('Microsoft.Network/publicIpAddresses/', parameters('windowsVMSettings').publicIpName)]",
+                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('windowsVMSettings').nsgName)]"
             ],
             "properties":{
                 "ipConfigurations":[
@@ -124,39 +124,39 @@
                             },
                             "privateIPAllocationMethod":"Dynamic",
                             "publicIPAddress":{
-                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', parameters('sampleVMSettings').publicIpName)]"
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', parameters('windowsVMSettings').publicIpName)]"
                             }
                         }
                     }
                 ],
                 "networkSecurityGroup":{
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('sampleVMSettings').nsgName)]"
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('windowsVMSettings').nsgName)]"
                 }
             }
         },
         {
-            "name": "[parameters('sampleVMSettings').vmName]",
+            "name": "[parameters('windowsVMSettings').vmName]",
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "[parameters('apiVersions').vmApiVersion]",
-            "location": "[parameters('sampleVMSettings').location]",
+            "location": "[parameters('windowsVMSettings').location]",
             "dependsOn": [
-                "[concat('Microsoft.Network/networkInterfaces/', parameters('sampleVMSettings').nicName)]"
+                "[concat('Microsoft.Network/networkInterfaces/', parameters('windowsVMSettings').nicName)]"
             ],
             "properties":{
                 "osProfile":{
-                    "computerName": "[parameters('sampleVMSettings').vmName]",
-                    "adminUsername": "[parameters('sampleVMSettings').adminUsername]",
-                    "adminPassword": "[parameters('sampleVMSettings').adminPassword]"
+                    "computerName": "[parameters('windowsVMSettings').vmName]",
+                    "adminUsername": "[parameters('windowsVMSettings').adminUsername]",
+                    "adminPassword": "[parameters('windowsVMSettings').adminPassword]"
                 },
                 "hardwareProfile":{
-                    "vmSize": "[parameters('sampleVMSettings').vmSize]"
+                    "vmSize": "[parameters('windowsVMSettings').vmSize]"
                 },
                 "storageProfile":{
                     "imageReference":{
-                        "publisher": "[parameters('sampleVMSettings').publisher]",
-                        "offer": "[parameters('sampleVMSettings').offer]",
-                        "sku": "[parameters('sampleVMSettings').sku]",
-                        "version": "[parameters('sampleVMSettings').version]"
+                        "publisher": "[parameters('windowsVMSettings').publisher]",
+                        "offer": "[parameters('windowsVMSettings').offer]",
+                        "sku": "[parameters('windowsVMSettings').sku]",
+                        "version": "[parameters('windowsVMSettings').version]"
                     },
                     "osDisk":{
                         "createOption":"FromImage",
@@ -169,7 +169,7 @@
                 "networkProfile":{
                     "networkInterfaces":[
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('sampleVMSettings').nicName)]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('windowsVMSettings').nicName)]"
                         }
                     ]
                 }
@@ -179,7 +179,7 @@
     "outputs": {
         "sampleVMPrivateIP":{
             "type": "string",
-            "value": "[reference(concat('Microsoft.Network/networkInterfaces/', parameters('sampleVMSettings').nicName)).ipConfigurations[0].properties.privateIPAddress]"
+            "value": "[reference(concat('Microsoft.Network/networkInterfaces/', parameters('windowsVMSettings').nicName)).ipConfigurations[0].properties.privateIPAddress]"
         }
     }
 }
