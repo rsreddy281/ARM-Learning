@@ -15,21 +15,21 @@
         "vnetSettings": {
             "location": "[variables('location')]",
             "networkApiversion": "2016-03-30",
-            "virtualNetworkName": "sample-vnet",
+            "virtualNetworkName": "winlin-vnet",
             "addressPrefix": "10.0.0.0/16",
-            "subnet1Name": "mgmt-subnet",
+            "subnet1Name": "win-subnet",
             "subnet1Prefix": "10.0.1.0/24",
-            "subnet2Name": "mirror-subnet",
+            "subnet2Name": "lin-subnet",
             "subnet2Prefix": "10.0.2.0/24"
         },
-        "sampleVMSettings": {
+        "windowsVMSettings": {
             "location": "[variables('location')]",
-            "publicIpName": "sampleVM-pip",
+            "publicIpName": "windowsVM-pip",
             "publicIpAddressType": "Dynamic",
             "dnsLabelPrefix": "[concat('samplevm', variables('suffix'))]",
-            "nsgName": "sampleVM-nsg",
-            "nicName": "sampleVm-nic",
-            "vmName": "sampleVM",
+            "nsgName": "windowsVM-nsg",
+            "nicName": "windowsVm-nic",
+            "vmName": "windowsVM",
             "adminUsername": "adminuser",
             "adminPassword": "Password@1234",
             "vmSize": "Standard_B1s",
@@ -38,14 +38,14 @@
             "sku": "2016-Datacenter",
             "version": "latest"
         },
-        "sampleVMSettings1": {
+        "linuxVMSettings": {
             "location": "[variables('location')]",
-            "publicIpName": "sampleVM-pip",
+            "publicIpName": "linuxVM-pip",
             "publicIpAddressType": "Dynamic",
             "dnsLabelPrefix": "[concat('samplevm', variables('suffix'))]",
-            "nsgName": "sampleVM-nsg",
-            "nicName": "sampleVm-nic",
-            "vmName": "sampleVM",
+            "nsgName": "linuxVM-nsg",
+            "nicName": "linuxVm-nic",
+            "vmName": "linuxVM",
             "adminUsername": "adminuser",
             "adminPassword": "Password@1234",
             "vmSize": "Standard_B1s",
@@ -60,7 +60,7 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
-            "name": "VirtualNetwork",
+            "name": "virtualNetwork",
             "apiVersion": "2016-02-01",
             "properties": {
                 "mode": "Incremental",
@@ -81,17 +81,17 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "name": "SampleWin",
+            "name": "windowsVM",
             "apiVersion": "2016-02-01",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "https://raw.githubusercontent.com/rsreddy281/ARM-Learning/master/NestedWinLin/nested/sampleWin.json",
+                    "uri": "https://raw.githubusercontent.com/rsreddy281/ARM-Learning/master/NestedWinLin/nested/windowsVM.json",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
-                    "sampleVMSettings": {
-                        "value": "[variables('sampleVMSettings')]"
+                    "windowsVMSettings": {
+                        "value": "[variables('windowsVMSettings')]"
                     },
                     "vnetSettings": {
                         "value": "[variables('vnetSettings')]"
@@ -102,22 +102,22 @@
                 }
             },
             "dependsOn": [
-                "VirtualNetwork"
+                "virtualNetwork"
             ]
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "name": "sampleLin",
+            "name": "linuxVM",
             "apiVersion": "2016-02-01",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "https://raw.githubusercontent.com/rsreddy281/ARM-Learning/master/NestedWinLin/nested/sampleLin.json",
+                    "uri": "https://raw.githubusercontent.com/rsreddy281/ARM-Learning/master/NestedWinLin/nested/linuxVM.json",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
-                    "sampleVMSettings1": {
-                        "value": "[variables('sampleVMSettings1')]"
+                    "linuxVMSettings": {
+                        "value": "[variables('linuxVMSettings')]"
                     },
                     "vnetSettings": {
                         "value": "[variables('vnetSettings')]"
@@ -128,8 +128,8 @@
                 }
             },
             "dependsOn": [
-                "VirtualNetwork",
-                "SampleWin"
+                "virtualNetwork",
+                "windowsVM"
             ]
         }
     ],
