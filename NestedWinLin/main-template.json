@@ -116,7 +116,7 @@
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
-                    "sampleVMSettings": {
+                    "sampleVMSettings1": {
                         "value": "[variables('sampleVMSettings1')]"
                     },
                     "vnetSettings": {
